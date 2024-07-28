@@ -1,4 +1,4 @@
-class Calculator {
+class ScientificCalculator {
     constructor(historyElement, resultElement) {
         this.historyElement = historyElement;
         this.resultElement = resultElement;
@@ -41,28 +41,45 @@ class Calculator {
         const current = parseFloat(this.currentOperand);
         if (isNaN(prev) || isNaN(current)) return;
         switch (this.operation) {
-            case '+':
-                computation = prev + current;
-                break;
-            case '-':
-                computation = prev - current;
-                break;
-            case '*':
-                computation = prev * current;
-                break;
-            case '/':
-                computation = prev / current;
-                break;
-            case '%':
-                computation = prev % current;
-                break;
-            default:
-                return;
+            case '+': computation = prev + current; break;
+            case '-': computation = prev - current; break;
+            case '*': computation = prev * current; break;
+            case '/': computation = prev / current; break;
+            case '%': computation = prev % current; break;
+            case '^': computation = Math.pow(prev, current); break;
+            default: return;
         }
         this.currentOperand = computation;
         this.operation = undefined;
         this.previousOperand = '';
         this.updateDisplay();
+    }
+
+    performFunction(func) {
+        const current = parseFloat(this.currentOperand);
+        if (isNaN(current)) return;
+        switch (func) {
+            case 'sin': this.currentOperand = Math.sin(current); break;
+            case 'cos': this.currentOperand = Math.cos(current); break;
+            case 'tan': this.currentOperand = Math.tan(current); break;
+            case 'log': this.currentOperand = Math.log10(current); break;
+            case 'ln': this.currentOperand = Math.log(current); break;
+            case 'sqrt': this.currentOperand = Math.sqrt(current); break;
+            case 'factorial': this.currentOperand = this.factorial(current); break;
+            case 'exp': this.currentOperand = Math.exp(current); break;
+            case 'reciprocal': this.currentOperand = 1 / current; break;
+            case 'absolute': this.currentOperand = Math.abs(current); break;
+        }
+        this.updateDisplay();
+    }
+
+    factorial(n) {
+        if (n === 0 || n === 1) return 1;
+        let result = 1;
+        for (let i = 2; i <= n; i++) {
+            result *= i;
+        }
+        return result;
     }
 
     updateDisplay() {
@@ -77,7 +94,7 @@ class Calculator {
 
 const historyElement = document.getElementById('history');
 const resultElement = document.getElementById('result');
-const calculator = new Calculator(historyElement, resultElement);
+const calculator = new ScientificCalculator(historyElement, resultElement);
 
 document.querySelector('.buttons').addEventListener('click', event => {
     if (event.target.matches('button')) {
@@ -87,7 +104,7 @@ document.querySelector('.buttons').addEventListener('click', event => {
 
         if (!action) {
             calculator.appendNumber(content);
-        } else if (action === 'add' || action === 'subtract' || action === 'multiply' || action === 'divide' || action === 'percent') {
+        } else if (['add', 'subtract', 'multiply', 'divide', 'percent', 'pow'].includes(action)) {
             calculator.chooseOperation(content);
         } else if (action === 'clear') {
             calculator.clear();
@@ -95,6 +112,10 @@ document.querySelector('.buttons').addEventListener('click', event => {
             calculator.delete();
         } else if (action === 'calculate') {
             calculator.compute();
+        } else if (button.classList.contains('function')) {
+            calculator.performFunction(action);
+        } else if (button.classList.contains('constant')) {
+            calculator.appendNumber(button.dataset.value);
         }
     }
 });
